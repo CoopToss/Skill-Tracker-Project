@@ -17,12 +17,13 @@ def create_app(config_class=Config):
     login_manager.init_app(app)
     login_manager.login_view = 'login'
 
-    with app.app_context():
-        from . import routes, models  
-
     @login_manager.user_loader
     def load_user(user_id):
-        from .models import User  
-        return User.query.get(int(user_id))
+        return models.User.query.get(int(user_id))
+
+    with app.app_context():
+        from . import routes
 
     return app
+
+from . import models
