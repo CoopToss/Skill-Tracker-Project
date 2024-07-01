@@ -2,15 +2,14 @@ from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
-class User(UserMixin, db.Model):
+class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(256), index=True, unique=True)
     email = db.Column(db.String(256), index=True, unique=True)
     password_hash = db.Column(db.String(128))
-    goals = db.relationship('Goal', backref='user', overlaps="goals,user", lazy='dynamic')
+    goals = db.relationship('Goal', back_populates='user', lazy='dynamic')
     skills = db.relationship('Skill', backref='user', lazy=True)
-    associated_goals = db.relationship('Goal', backref='associated_user', overlaps="goals,user")
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -26,7 +25,8 @@ class Goal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(140))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    associated_user = db.relationship('User', backref='associated_goals', overlaps="goals,user")
+    user = db.relationship('User', back_populates='goals')
+
 
 class Skill(db.Model):
     id = db.Column(db.Integer, primary_key=True)
