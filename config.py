@@ -1,6 +1,6 @@
 import os
 
-SQLALCHEMY_DATABASE_URI = os.environ.get('SUPABASE_DB_URL') or 'postgresql://cooper:cooper12@localhost:5432/skill_tracker'
+SQLALCHEMY_DATABASE_URI = os.environ.get('SUPABASE_DB_URL') or 'postgresql://postgres.iyxtfszywwrsefhzjwzj:[YOUR-PASSWORD]@aws-0-us-east-1.pooler.supabase.com:5432/postgres'
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
