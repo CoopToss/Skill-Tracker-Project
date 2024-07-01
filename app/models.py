@@ -8,8 +8,9 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(256), index=True, unique=True)
     email = db.Column(db.String(256), index=True, unique=True)
     password_hash = db.Column(db.String(128))
-    goals = db.relationship('Goal', backref='user', overlaps="goals, user", lazy='dynamic')
+    goals = db.relationship('Goal', backref='user', overlaps="goals,user", lazy='dynamic')
     skills = db.relationship('Skill', backref='user', lazy=True)
+    associated_goals = db.relationship('Goal', backref='associated_user', overlaps="goals,user")
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -25,7 +26,7 @@ class Goal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(140))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    associated_user = db.relationship('User', backref='associated_goals', overlaps="goals, user")
+    associated_user = db.relationship('User', backref='associated_goals', overlaps="goals,user")
 
 class Skill(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -41,4 +42,6 @@ class SkillLog(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     hours = db.Column(db.Integer)
-    date = db
+    date = db.Column(db.DateTime)
+    skill_id = db.Column(db.Integer, db.ForeignKey('skills.id'))
+
