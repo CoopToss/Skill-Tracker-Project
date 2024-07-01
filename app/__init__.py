@@ -23,6 +23,7 @@ def create_app(config_class=Config):
 
     with app.app_context():
         from . import routes
+        routes.init_app(app)
 
     return app
 
