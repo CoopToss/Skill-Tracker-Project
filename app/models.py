@@ -2,7 +2,6 @@ from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
-
 class User(UserMixin, db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
@@ -26,7 +25,7 @@ class Goal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(140))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    associated_user = db.relationship('User', backref='associated_goals')
+    associated_user = db.relationship('User', backref='associated_goals', overlaps="goals, user")
 
 class Skill(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -42,5 +41,4 @@ class SkillLog(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     hours = db.Column(db.Integer)
-    date = db.Column(db.DateTime)
-    skill_id = db.Column(db.Integer, db.ForeignKey('skills.id'))
+    date = db
