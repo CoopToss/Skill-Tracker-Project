@@ -18,6 +18,10 @@ def init_app(app):
             email = request.form.get('email')
             password = request.form.get('password')
 
+            if len(password) < 8:
+                flash('Password must be at least 8 characters long.')
+                return redirect(url_for('signup'))
+                
             new_user = User(username=username, email=email)
             new_user.set_password(password)
 
