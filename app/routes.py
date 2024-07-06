@@ -1,11 +1,14 @@
 from flask import redirect, url_for, render_template, request, flash, abort
 from flask_login import login_user, logout_user, current_user, login_required
+from sqlalchemy.exc import IntegrityError
 from . import db
 from .models import User, Skill, Goal
 
 def init_app(app):
     @app.route('/')
     def index():
+        if current_user.is_authenticated:
+            return redirect(url_for('dashboard'))
         return render_template('index.html')
 
     @app.route('/signup', methods=['GET', 'POST'])
@@ -18,11 +21,15 @@ def init_app(app):
             new_user = User(username=username, email=email)
             new_user.set_password(password)
 
-            db.session.add(new_user)
-            db.session.commit()
-
-            login_user(new_user)
-            return redirect(url_for('dashboard'))
+            try:
+                db.session.add(new_user)
+                db.session.commit()
+                login_user(new_user)
+                return redirect(url_for('dashboard'))
+            except IntegrityError:
+                db.session.rollback()
+                flash('Username or email already exists.')
+                return redirect(url_for('signup'))
         return render_template('register.html')
 
     @app.route('/login', methods=['GET', 'POST'])
@@ -36,7 +43,7 @@ def init_app(app):
             if user and user.check_password(password):
                 login_user(user)
                 return redirect(url_for('dashboard'))
-            return render_template('login.html', error="Invalid email or password.")
+            flash("Invalid email or password.")
         return render_template('login.html')
 
     @app.route('/logout')
@@ -66,18 +73,20 @@ def init_app(app):
 
             try:
                 hours_logged = int(hours_logged_str)
+                if hours_logged < 0:
+                    flash('Hours logged cannot be negative.')
+                    return redirect(url_for('dashboard'))
             except ValueError:
+                flash('Invalid input for hours logged.')
                 return redirect(url_for('dashboard'))
 
             existing_skill = Skill.query.filter_by(name=skill_name, user_id=current_user.id).first()
-            
             if existing_skill:
                 existing_skill.hours_logged += hours_logged
                 existing_skill.goal_details = goal_details
             else:
                 new_skill = Skill(name=skill_name, hours_logged=hours_logged, goal_details=goal_details, user_id=current_user.id)
                 db.session.add(new_skill)
-            
             db.session.commit()
             return redirect(url_for('dashboard'))
 
@@ -85,6 +94,8 @@ def init_app(app):
     @login_required
     def skill_detail(skill_id):
         skill = Skill.query.get_or_404(skill_id)
+        if skill.user != current_user:
+            abort(403)
         goal_details = [skill.goal_details] if skill.goal_details else []
         return render_template('skill_detail.html', skill=skill, goal_details=goal_details)
 
@@ -98,3 +109,4 @@ def init_app(app):
         db.session.commit()
         flash('Skill has been deleted!', 'success')
         return redirect(url_for('dashboard'))
+
