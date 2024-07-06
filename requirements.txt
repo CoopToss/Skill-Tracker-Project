@@ -18,3 +18,4 @@ psycopg2-binary==2.9.9
 SQLAlchemy==2.0.31
 Werkzeug==3.0.3
 WTForms==3.1.2
+email-validator==1.1.3
