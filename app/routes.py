@@ -17,6 +17,10 @@ def init_app(app):
             email = request.form.get('email')
             password = request.form.get('password')
 
+            if User.query.filter_by(username=username).first() or User.query.filter_by(email=email).first():
+                flash('Username or email already exists.', 'error')
+                return render_template('register.html')
+
             new_user = User(username=username, email=email)
             new_user.set_password(password)
 
@@ -45,8 +49,8 @@ def init_app(app):
     @login_required
     def logout():
         logout_user()
-        flash("You have been logged out.", "success")
-        return redirect(url_for('login'))
+        flash("You have been logged out.", "info")
+        return redirect(url_for('index'))
 
     @app.route('/dashboard')
     @login_required
