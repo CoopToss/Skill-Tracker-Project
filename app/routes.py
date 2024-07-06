@@ -6,6 +6,8 @@ from .models import User, Skill, Goal
 def init_app(app):
     @app.route('/')
     def index():
+        if current_user.is_authenticated:
+            return redirect(url_for('dashboard'))
         return render_template('index.html')
 
     @app.route('/signup', methods=['GET', 'POST'])
@@ -36,13 +38,15 @@ def init_app(app):
             if user and user.check_password(password):
                 login_user(user)
                 return redirect(url_for('dashboard'))
-            return render_template('login.html', error="Invalid email or password.")
+            flash("Invalid email or password.", "danger")
         return render_template('login.html')
 
     @app.route('/logout')
+    @login_required
     def logout():
         logout_user()
-        return redirect(url_for('index'))
+        flash("You have been logged out.", "success")
+        return redirect(url_for('login'))
 
     @app.route('/dashboard')
     @login_required
@@ -98,3 +102,4 @@ def init_app(app):
         db.session.commit()
         flash('Skill has been deleted!', 'success')
         return redirect(url_for('dashboard'))
+
