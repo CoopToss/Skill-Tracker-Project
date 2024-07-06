@@ -1,13 +1,10 @@
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config(object):
-    SECRET_KEY = os.getenv('SECRET_KEY')
-    SQLALCHEMY_DATABASE_URI = os.getenv('SUPABASE_DB_URL')
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'cooperwashere'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('SUPABASE_DB_URL') or 'postgresql://postgres.iyxtfszywwrsefhzjwzj:Tebow1215Database@aws-0-us-east-1.pooler.supabase.com:5432/postgres'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     if not SQLALCHEMY_DATABASE_URI:
