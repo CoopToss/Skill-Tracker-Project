@@ -74,7 +74,11 @@ def init_app(app):
 
             try:
                 hours_logged = int(hours_logged_str)
+                if hours_logged < 0:
+                    flash('Hours logged must be a positive number.', 'error')
+                    return redirect(url_for('dashboard'))
             except ValueError:
+                flash('Invalid hours logged value.', 'error')
                 return redirect(url_for('dashboard'))
 
             existing_skill = Skill.query.filter_by(name=skill_name, user_id=current_user.id).first()
