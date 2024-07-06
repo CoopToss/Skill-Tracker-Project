@@ -3,6 +3,11 @@ from flask_login import login_user, logout_user, current_user, login_required
 from . import db
 from .models import User, Skill, Goal
 from .forms import LoginForm, RegistrationForm
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 def init_app(app):
     @app.route('/')
@@ -37,15 +42,25 @@ def init_app(app):
     def login():
         form = LoginForm()
         if form.validate_on_submit():
+            logger.debug('Form validated successfully.')
             email = form.email.data
             password = form.password.data
 
             user = User.query.filter_by(email=email).first()
 
             if user and user.check_password(password):
+                logger.debug('User authenticated successfully.')
                 login_user(user)
                 return redirect(url_for('dashboard'))
-            flash('Invalid email or password.')
+            else:
+                logger.debug('Invalid email or password.')
+                flash('Invalid email or password.')
+        else:
+            logger.debug('Form validation failed.')
+            for field, errors in form.errors.items():
+                for error in errors:
+                    flash(f"Error in {getattr(form, field).label.text}: {error}")
+
         return render_template('login.html', form=form)
 
     @app.route('/logout')
@@ -110,4 +125,3 @@ def init_app(app):
         db.session.commit()
         flash('Skill has been deleted!', 'success')
         return redirect(url_for('dashboard'))
-
