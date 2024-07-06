@@ -3,6 +3,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from sqlalchemy.exc import IntegrityError
 from . import db
 from .models import User, Skill, Goal
+from .forms import RegistrationForm, LoginForm
 
 def init_app(app):
     @app.route('/')
@@ -13,15 +14,12 @@ def init_app(app):
 
     @app.route('/signup', methods=['GET', 'POST'])
     def signup():
-        if request.method == 'POST':
-            username = request.form.get('username')
-            email = request.form.get('email')
-            password = request.form.get('password')
+        form = RegistrationForm()
+        if form.validate_on_submit():
+            username = form.username.data
+            email = form.email.data
+            password = form.password.data
 
-            if len(password) < 8:
-                flash('Password must be at least 8 characters long.')
-                return redirect(url_for('signup'))
-                
             new_user = User(username=username, email=email)
             new_user.set_password(password)
 
@@ -34,13 +32,14 @@ def init_app(app):
                 db.session.rollback()
                 flash('Username or email already exists.')
                 return redirect(url_for('signup'))
-        return render_template('register.html')
+        return render_template('register.html', form=form)
 
     @app.route('/login', methods=['GET', 'POST'])
     def login():
-        if request.method == 'POST':
-            email = request.form.get('email')
-            password = request.form.get('password')
+        form = LoginForm()
+        if form.validate_on_submit():
+            email = form.email.data
+            password = form.password.data
 
             user = User.query.filter_by(email=email).first()
 
@@ -48,7 +47,7 @@ def init_app(app):
                 login_user(user)
                 return redirect(url_for('dashboard'))
             flash("Invalid email or password.")
-        return render_template('login.html')
+        return render_template('login.html', form=form)
 
     @app.route('/logout')
     def logout():
